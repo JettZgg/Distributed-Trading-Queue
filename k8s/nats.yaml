@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats-service
+spec:
+  ports:
+  - port: 4222
+    targetPort: 4222
+    name: client
+  - port: 6222
+    targetPort: 6222
+    name: cluster
+  - port: 8222
+    targetPort: 8222
+    name: http
+  selector:
+    app: nats
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+spec:
+  serviceName: nats-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nats
+  template:
+    metadata:
+      labels:
+        app: nats
+    spec:
+      containers:
+      - name: nats
+        image: nats:latest
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+        - containerPort: 4222
+          name: client
+        - containerPort: 6222
+          name: cluster
+        - containerPort: 8222
+          name: http
+        command: ["/nats-server"]
+        args:
+          - "-js"
+          - "-m=8222"
+          - "-p=4222"
+          - "--cluster_name=my_nats_cluster"
+          - "--cluster=nats://0.0.0.0:6222"
+          - "--routes=nats://nats-0.nats-service:6222,nats://nats-1.nats-service:6222,nats://nats-2.nats-service:6222"
+          - "--config=/etc/nats-config/nats.conf"
+        volumeMounts:
+        - name: nats-data
+          mountPath: /data/nats-server
+        - name: nats-config-volume
+          mountPath: /etc/nats-config
+      volumes:
+        - name: nats-config-volume
+          configMap:
+            name: nats-config
+  volumeClaimTemplates:
+  - metadata:
+      name: nats-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi 

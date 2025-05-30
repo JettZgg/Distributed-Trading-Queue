@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  NATS_URL: "nats://nats-service:4222"
+  ORDER_SERVICE_PORT: "8080" 

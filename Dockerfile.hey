@@ -1,0 +1,8 @@
+FROM golang:1.24-alpine AS builder
+WORKDIR /src
+RUN go install github.com/rakyll/hey@latest
+ 
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /go/bin/hey /app/hey
+ENTRYPOINT ["/app/hey"] 

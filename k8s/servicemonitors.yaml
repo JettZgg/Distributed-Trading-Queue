@@ -1,0 +1,99 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nats-servicemonitor
+  namespace: default # Ensure this is the namespace your nats-exporter service is in
+  labels:
+    release: prometheus # The label Prometheus Operator looks for
+    app: nats-exporter # Updated to match the nats-exporter service
+spec:
+  selector:
+    matchLabels:
+      app: nats-exporter # Selects the nats-exporter Service
+  namespaceSelector:
+    matchNames:
+      - default # Or the namespace where your nats-exporter service is
+  endpoints:
+  - port: http-metrics # The name of the port in the nats-exporter Service (7777)
+    path: /metrics # The path prometheus-nats-exporter exposes metrics on
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: orderservice-servicemonitor
+  namespace: default # Assuming OrderService is in default namespace
+  labels:
+    release: prometheus
+    team: my-team
+spec:
+  selector:
+    matchLabels:
+      app: orderservice # Selects the OrderService service
+  namespaceSelector:
+    matchNames:
+      - default # Namespace of the OrderService service
+  endpoints:
+  - port: http-metrics # Name of the port in OrderService service (8080)
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: inventoryworker-servicemonitor
+  namespace: default
+  labels:
+    release: prometheus
+    team: my-team
+spec:
+  selector:
+    matchLabels:
+      app: inventoryworker
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+  - port: http-metrics # Port 2112
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: notificationworker-servicemonitor
+  namespace: default
+  labels:
+    release: prometheus
+    team: my-team
+spec:
+  selector:
+    matchLabels:
+      app: notificationworker
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+  - port: http-metrics # Port 2112
+    interval: 15s
+    path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: paymentsimulatorworker-servicemonitor
+  namespace: default
+  labels:
+    release: prometheus
+    team: my-team
+spec:
+  selector:
+    matchLabels:
+      app: paymentsimulatorworker
+  namespaceSelector:
+    matchNames:
+      - default
+  endpoints:
+  - port: http-metrics # Port 2112
+    interval: 15s
+    path: /metrics 

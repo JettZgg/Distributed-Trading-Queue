@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nats-exporter
+  namespace: default
+  labels:
+    app: nats-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nats-exporter
+  template:
+    metadata:
+      labels:
+        app: nats-exporter
+    spec:
+      containers:
+      - name: nats-exporter
+        image: natsio/prometheus-nats-exporter:latest
+        args:
+          - -D # Enable debug logging
+          - -connz # Enable connection metrics
+          - -jsz # Enable ALL JetStream metrics
+          - "all" # Try "all" for jsz filter
+          # -varz is often enabled by default or implied when a URL is given
+          # The NATS server URL should be the primary, often last, argument
+          - "http://nats-service.default.svc.cluster.local:8222"
+        ports:
+        - name: metrics
+          containerPort: 7777
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats-exporter
+  namespace: default
+  labels:
+    app: nats-exporter
+spec:
+  selector:
+    app: nats-exporter
+  ports:
+  - name: http-metrics
+    port: 7777
+    targetPort: metrics 

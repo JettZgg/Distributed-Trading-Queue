@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventoryworker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventoryworker
+  template:
+    metadata:
+      labels:
+        app: inventoryworker
+    spec:
+      containers:
+      - name: inventoryworker
+        image: inventoryworker:latest
+        imagePullPolicy: Never
+        env:
+        - name: NATS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: NATS_URL
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - ps aux | grep inventoryworker
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notificationworker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: notificationworker
+  template:
+    metadata:
+      labels:
+        app: notificationworker
+    spec:
+      containers:
+      - name: notificationworker
+        image: notificationworker:latest
+        imagePullPolicy: Never
+        env:
+        - name: NATS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: NATS_URL
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - ps aux | grep notificationworker
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentsimulatorworker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paymentsimulatorworker
+  template:
+    metadata:
+      labels:
+        app: paymentsimulatorworker
+    spec:
+      containers:
+      - name: paymentsimulatorworker
+        image: paymentsimulatorworker:latest
+        imagePullPolicy: Never
+        env:
+        - name: NATS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: NATS_URL
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - ps aux | grep paymentsimulatorworker
+          initialDelaySeconds: 5
+          periodSeconds: 10 

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hey-pod
+spec:
+  containers:
+  - name: hey-container
+    image: my-hey:latest # Use our custom built image
+    imagePullPolicy: Never # Image is preloaded onto Kind nodes
+    command: ["/app/hey"] # Adjusted command path based on Dockerfile
+    args: [
+      "-n", "150000",
+      "-c", "1000",
+      "-m", "POST",
+      "-T", "application/json",
+      "-d", "{\"userID\":\"internal-load-test-user\",\"items\":[{\"itemID\":\"item-internal-perf-test-001\",\"quantity\":1,\"price\":19.99},{\"itemID\":\"item-internal-perf-test-002\",\"quantity\":2,\"price\":4.50}]}",
+      "http://orderservice.default.svc.cluster.local:8080/api/orders"
+    ]
+  restartPolicy: Never # Run once and then terminate 

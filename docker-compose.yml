@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  nats:
+    image: nats:2.10.7-alpine # Using a specific recent version for stability
+    ports:
+      - "4222:4222" # Client port
+      - "6222:6222" # Clustering port
+      - "8222:8222" # HTTP monitoring port
+    command: [ "-js", "-m", "8222", "-sd", "/data/jetstream" ]
+    volumes:
+      - nats-data:/data/jetstream
+    restart: unless-stopped
+
+  orderservice:
+    build:
+      context: .
+      dockerfile: ./cmd/orderservice/Dockerfile
+    image: distributed-trading-queue/orderservice:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+    restart: unless-stopped
+
+  inventoryworker:
+    build:
+      context: .
+      dockerfile: ./cmd/inventoryworker/Dockerfile
+    image: distributed-trading-queue/inventoryworker:latest
+    environment:
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+    restart: unless-stopped
+
+  notificationworker:
+    build:
+      context: .
+      dockerfile: ./cmd/notificationworker/Dockerfile
+    image: distributed-trading-queue/notificationworker:latest
+    environment:
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+    restart: unless-stopped
+
+  paymentsimulatorworker:
+    build:
+      context: .
+      dockerfile: ./cmd/paymentsimulatorworker/Dockerfile
+    image: distributed-trading-queue/paymentsimulatorworker:latest
+    environment:
+      - NATS_URL=nats://nats:4222
+    depends_on:
+      - nats
+    restart: unless-stopped
+
+volumes:
+  nats-data:
