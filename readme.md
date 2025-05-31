@@ -7,11 +7,11 @@
 ### Local Deployment Guide
 
 **Prerequisites:**
-*   Go (version 1.18+)
+*   Go (version 1.24)
 *   Docker
-*   Kind (v0.11.0+)
-*   kubectl (v1.21+)
-*   Helm (v3+)
+*   Kind (v0.27.0)
+*   kubectl (v1.32.2)
+*   Helm (v3.18.0)
 
 **Steps:**
 
